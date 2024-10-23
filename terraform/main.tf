@@ -6,14 +6,14 @@ terraform {
     }
   }
 
-  backend "remote" {
-    hostname     = "app.terraform.io"
-    organization = "cloudslaves"
+//  backend "remote" {
+//    hostname     = "app.terraform.io"
+//    organization = "cloudslaves"
 
-    workspaces {
-      name = "cloudslaves"
-    }
-  }
+//    workspaces {
+//      name = "cloudslaves"
+//    }
+//  }
 }
 
 // local resource  to read the access key and secret key from json
