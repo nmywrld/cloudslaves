@@ -1,6 +1,6 @@
 resource "aws_lb" "private_app_lb" {
   name               = "private-app-lb"
-  internal           = false
+  internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = aws_subnet.private[*].id
