@@ -8,8 +8,8 @@ resource "aws_route53_record" "app" {
   type    = "A"
 
   alias {
-    name                   = aws_lb.app_lb.dns_name
-    zone_id                = aws_lb.app_lb.zone_id
+    name                   = aws_lb.public_app_lb.dns_name
+    zone_id                = aws_lb.public_app_lb.zone_id
     evaluate_target_health = true
   }
 }

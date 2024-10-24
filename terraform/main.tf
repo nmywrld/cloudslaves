@@ -23,7 +23,7 @@ locals {
 
 
 provider "aws" {
-  region     = "ap-southeast-1"
+  region     = "us-east-1"
   access_key = local.aws_credentials.access_key
   secret_key = local.aws_credentials.secret_key
 
