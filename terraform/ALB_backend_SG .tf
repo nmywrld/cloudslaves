@@ -1,7 +1,7 @@
-resource "aws_security_group" "alb_sg" {
-  name        = "alb-sg"
+resource "aws_security_group" "backend_alb_sg" {
+  name        = "backend-alb-sg"
   description = "Allow HTTP and HTTPS traffic to ALB"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = aws_vpc.backend.id
 
   ingress {
     from_port   = 80
