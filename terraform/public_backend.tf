@@ -1,3 +1,27 @@
+# Security group for Lambda
+resource "aws_security_group" "backend_lambda_sg" {
+  name        = "backend-lambda-sg"
+  description = "Security group for Lambda function"
+  vpc_id      = aws_vpc.backend.id
+
+  # Outbound traffic: Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+# Allow ALB to send traffic to Lambda (port 80 for HTTP, adjust if necessary)
+resource "aws_security_group_rule" "allow_alb_to_lambda" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend_lambda_sg.id  # Lambda's security group
+  source_security_group_id = aws_security_group.backend_alb_sg.id     # ALB's security group
+}
+
 
 # Step 1: Create the IAM role for the Lambda function to assume
 resource "aws_iam_role" "lambda_execution_role" {
@@ -49,38 +73,18 @@ resource "aws_lambda_function" "another_lambda_tg" {
   # VPC configuration for Lambda function
   vpc_config {
     subnet_ids         = aws_subnet.backend_public[*].id  # Use relevant subnets
-    security_group_ids = [aws_security_group.backend_alb_sg.id]  # Use the relevant security group
+    security_group_ids = [aws_security_group.backend_lambda_sg.id]  # Use the relevant security group
   }
 }
 
-# # Step 5: Create a target group for the Lambda function (necessary for ALB)
-# resource "aws_lb_target_group" "backend_lambda_tg" {
-#   name     = "backend-lambda-tg"
-#   target_type = "lambda"  # Ensure the target type is set to 'lambda'
-#   port     = 80
-#   protocol = "HTTP"
-# }
 
-
-
-# resource "aws_lb_target_group_attachment" "test" {
-#   target_group_arn = aws_lb_target_group.backend_lambda_tg.arn
-#   target_id        = aws_lambda_function.another_lambda_tg.arn  # Reference Lambda function ARN
-
-# }
-# Step 1: Create Lambda Permission to allow ALB to invoke Lambda
-# resource "aws_lambda_permission" "allow_alb" {
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.another_lambda_tg.function_name
-#   principal     = "elasticloadbalancing.amazonaws.com"
-#   source_arn    = aws_lb.backend_app_lb.arn
-# }
 resource "aws_lambda_permission" "allow_alb" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.another_lambda_tg.function_name
   principal     = "elasticloadbalancing.amazonaws.com"
   source_arn    = aws_lb_target_group.backend_lambda_tg.arn  # Correct the source_arn to target group ARN
 }
+
 
 
 
@@ -91,6 +95,15 @@ resource "aws_lb_target_group_attachment" "test" {
   depends_on       = [aws_lambda_permission.allow_alb]
 }
 
+
+# Step 6: Lambda permission to allow ALB to invoke the Lambda function
+resource "aws_lambda_permission" "allow_alb_invoke" {
+  statement_id  = "AllowExecutionFromALB"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.another_lambda_tg.function_name
+  principal     = "elasticloadbalancing.amazonaws.com"
+  source_arn    = aws_lb.backend_app_lb.arn
+}
 
 
 
