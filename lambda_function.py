@@ -60,19 +60,11 @@
 
 import json
 def function_one(event, context):
-    response_body = {
-        "message": "Success",
-        "data": "Your data goes here"
+    return {
+        'statusCode': 200,
+        'body': json.dumps('This is Function 1')
     }
 
-    # Return a properly formatted response
-    return {
-        "statusCode": 200,
-        "body": json.dumps(response_body),
-        "headers": {
-            "Content-Type": "application/json"
-        }
-    }
 def function_two(event, context):
     return {
         'statusCode': 200,
