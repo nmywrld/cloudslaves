@@ -1,0 +1,1 @@
+{"errorMessage": "'path'", "errorType": "KeyError", "requestId": "a6e417de-e4d5-48ad-b923-262a09de98fd", "stackTrace": ["  File \"/var/task/lambda_function.py\", line 75, in lambda_handler\n    path = event['path']  # Get the path from the incoming request\n"]}

@@ -23,4 +23,6 @@ resource "aws_lb_listener" "frontend_public_http" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.frontend_ecs_tg.arn
   }
+  depends_on = [aws_lb.frontend_app_lb, aws_lb_target_group.frontend_ecs_tg]
+
 }
