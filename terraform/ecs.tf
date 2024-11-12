@@ -11,6 +11,18 @@ resource "aws_ecs_task_definition" "frontend_task" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
 
+  # container_definitions = jsonencode([{
+  #   name      = "frontend"
+  #   image     = "nmywrld/cloudslaves-frontend"
+  #   essential = true
+  #   portMappings = [
+  #     {
+  #       containerPort = 80
+  #       protocol      = "tcp"
+  #     }
+  #   ]
+  # }])
+
   container_definitions = jsonencode([{
     name      = "frontend"
     image     = "nmywrld/cloudslaves-frontend"
@@ -21,7 +33,16 @@ resource "aws_ecs_task_definition" "frontend_task" {
         protocol      = "tcp"
       }
     ]
+    environment = [
+      {
+        name  = "BACKEND_URL"
+        value = aws_lb.backend_app_lb.dns_name
+      }
+      // Add other environment variables here
+    ]
   }])
+
+  depends_on = [ aws_lb.backend_app_lb ]
 }
 
 # IAM role for ECS task execution
@@ -39,8 +60,28 @@ data "aws_iam_policy_document" "ecs_assume_role_policy" {
     }
   }
 }
+# Security group for ECS service
+resource "aws_security_group" "ecs_service_sg" {
+  name        = "ecs-service-sg"
+  description = "Security group for ECS service"
+  vpc_id      = aws_vpc.frontend.id
 
-# ECS Service configuration
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    security_groups = [aws_security_group.frontend_alb_sg.id]  # Allow traffic only from ALB security group
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Update ECS Service configuration to use the new security group
 resource "aws_ecs_service" "frontend_service" {
   name            = "frontend-service"
   cluster         = aws_ecs_cluster.frontend_cluster.id
@@ -52,7 +93,7 @@ resource "aws_ecs_service" "frontend_service" {
   network_configuration {
     subnets          = [for subnet in aws_subnet.frontend_public : subnet.id]  # Loop through and get all public subnet IDs
     assign_public_ip = true
-    security_groups  = [aws_security_group.frontend_alb_sg.id]  # Reference the security group for ALB
+    security_groups  = [aws_security_group.ecs_service_sg.id]  # Reference the new security group for ECS
   }
 
   # Load Balancer configuration
@@ -64,7 +105,7 @@ resource "aws_ecs_service" "frontend_service" {
 
   # Explicitly define dependencies to ensure all resources are created before ECS Service
   depends_on = [
-    aws_security_group.frontend_alb_sg,   # Security group dependency
+    aws_security_group.ecs_service_sg,    # New security group dependency
     aws_lb_target_group.frontend_ecs_tg,  # Target group dependency
     aws_lb_listener.frontend_public_http  # Load balancer listener dependency
   ]

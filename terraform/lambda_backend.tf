@@ -66,13 +66,13 @@ resource "aws_lambda_function" "another_lambda_tg" {
   handler       = "lambda_function.lambda_handler"  # The method in your code that Lambda calls
   runtime       = "python3.9"  # Specify runtime
   timeout       = 10  # Timeout in seconds
-  filename      = "BackEnd.zip"  # Path to the zipped Lambda code
+  filename      = "lambda_function.py.zip"  # Path to the zipped Lambda code
   role           = aws_iam_role.lambda_execution_role.arn  # IAM role to assume
-  source_code_hash = filebase64sha256("BackEnd.zip")
+  source_code_hash = filebase64sha256("lambda_function.py.zip")
 
   # VPC configuration for Lambda function
   vpc_config {
-    subnet_ids         = aws_subnet.backend_public[*].id  # Use relevant subnets
+    subnet_ids         = aws_subnet.backend_private[*].id  # Use relevant subnets
     security_group_ids = [aws_security_group.backend_lambda_sg.id]  # Use the relevant security group
   }
 }

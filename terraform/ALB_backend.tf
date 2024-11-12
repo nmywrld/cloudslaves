@@ -9,8 +9,6 @@ resource "aws_lb" "backend_app_lb" {
   enable_http2                                = true
   idle_timeout                                = 60
   ip_address_type                             = "ipv4"
-
-  
 }
 
 resource "aws_lb_target_group" "backend_lambda_tg" {
@@ -21,8 +19,8 @@ resource "aws_lb_target_group" "backend_lambda_tg" {
 
 resource "aws_lb_listener" "backend_private_http" {
   load_balancer_arn = aws_lb.backend_app_lb.arn
-  # port              = 80
-  # protocol          = "HTTP"
+  port              = 80
+  protocol          = "HTTP"
 
   default_action {
     type             = "forward"
