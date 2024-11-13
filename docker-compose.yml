@@ -12,3 +12,4 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=production
+      - BACKEND_URL=http://your-backend-url.com  # Add your backend URL here

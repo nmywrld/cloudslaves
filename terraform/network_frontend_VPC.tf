@@ -52,3 +52,21 @@ resource "aws_route_table_association" "frontend_private" {
   subnet_id      = aws_subnet.frontend_private[count.index].id
   route_table_id = aws_route_table.frontend_private.id
 }
+
+# Step 1: Create an Elastic IP for the NAT Gateway
+resource "aws_eip" "frontend_nat" {
+  domain = "vpc"
+}
+
+# Step 2: Create the NAT Gateway in one of the public subnets
+resource "aws_nat_gateway" "frontend_nat" {
+  allocation_id = aws_eip.frontend_nat.id
+  subnet_id     = aws_subnet.frontend_public[0].id  # Place NAT Gateway in the first public subnet
+}
+
+# Step 3: Update the private route table to route traffic through the NAT Gateway
+resource "aws_route" "frontend_private_nat" {
+  route_table_id         = aws_route_table.frontend_private.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.frontend_nat.id
+}

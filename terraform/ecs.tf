@@ -91,7 +91,7 @@ resource "aws_ecs_service" "frontend_service" {
 
   # Network configuration
   network_configuration {
-    subnets          = [for subnet in aws_subnet.frontend_public : subnet.id]  # Loop through and get all public subnet IDs
+    subnets          = [for subnet in aws_subnet.frontend_private : subnet.id]  # Loop through and get all public subnet IDs
     assign_public_ip = true
     security_groups  = [aws_security_group.ecs_service_sg.id]  # Reference the new security group for ECS
   }
