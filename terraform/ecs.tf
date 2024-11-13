@@ -110,3 +110,48 @@ resource "aws_ecs_service" "frontend_service" {
     aws_lb_listener.frontend_public_http  # Load balancer listener dependency
   ]
 }
+
+
+
+# CloudWatch Metric for ECS Service CPU Utilization
+resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {
+  alarm_name          = "ecs-cpu-high"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "20"
+  alarm_description   = "This metric monitors ECS service CPU utilization"
+  dimensions = {
+    ClusterName  = aws_ecs_cluster.frontend_cluster.name
+    ServiceName  = aws_ecs_service.frontend_service.name
+  }
+}
+
+# ECS Service Autoscaling
+resource "aws_appautoscaling_target" "frontend_scaling_target" {
+  max_capacity       = 10
+  min_capacity       = 1
+  resource_id        = "service/${aws_ecs_cluster.frontend_cluster.name}/${aws_ecs_service.frontend_service.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "frontend_scaling_policy" {
+  name               = "frontend-scaling-policy"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.frontend_scaling_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.frontend_scaling_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.frontend_scaling_target.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = 50.0
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 300
+  }
+}
