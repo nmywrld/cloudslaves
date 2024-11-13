@@ -36,7 +36,7 @@ resource "aws_ecs_task_definition" "frontend_task" {
     environment = [
       {
         name  = "BACKEND_URL"
-        value = aws_lb.backend_app_lb.dns_name
+        value = "http://${aws_lb.backend_app_lb.dns_name}"
       }
       // Add other environment variables here
     ]
