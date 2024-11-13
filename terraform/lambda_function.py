@@ -57,26 +57,36 @@
 #     }
 
 
-
 import json
+
 def function_one(event, context):
     response_body = {
         "message": "Success",
-        "data": "Your data goes here"
+        "data": 1000000
     }
 
-    # Return a properly formatted response
+    # Return a properly formatted response with CORS headers
     return {
         "statusCode": 200,
         "body": json.dumps(response_body),
         "headers": {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",  # Allow requests from any origin
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
         }
     }
+
 def function_two(event, context):
     return {
         'statusCode': 200,
-        'body': json.dumps('This is Function 2')
+        'body': json.dumps('This is Function 2'),
+        'headers': {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",  # Allow requests from any origin
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
+        }
     }
 
 def lambda_handler(event, context):
@@ -90,5 +100,11 @@ def lambda_handler(event, context):
     else:
         return {
             'statusCode': 404,
-            'body': json.dumps('Not Found')
+            'body': json.dumps('Not Found'),
+            'headers': {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",  # Allow requests from any origin
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
+            }
         }

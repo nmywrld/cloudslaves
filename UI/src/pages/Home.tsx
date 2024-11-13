@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import axios from 'axios';
 
 // components
 import Layout from '../components/Layout/Layout';
@@ -11,23 +12,38 @@ import Divider from '../components/Divider/Divider';
 const backendUrl = window._env_.BACKEND_URL;
 console.log(backendUrl);
 
-const Home = (): React.JSX.Element => (
+const Home = (): React.JSX.Element => {
+  const [balanceAmt, setBalanceAmt] = useState<number>(0);
 
-  <Layout>
-    <Balance balance={1325.5} currency='EURO' currencySymbol='€' />
+  useEffect(() => {
+    // Send a request to /function1 on page load
+    axios.get(`${backendUrl}/function1`)
+      .then(response => {
+        console.log(response.data);
+        setBalanceAmt(response.data.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
 
-    <Actions />
+  return (
+    <Layout>
+      <Balance balance={balanceAmt} currency='EURO' currencySymbol='€' />
 
-    <Divider />
+      <Actions />
 
-    <History />
+      <Divider />
 
-    <Divider />
+      <History />
 
-    <Widgets />
+      <Divider />
 
-    <Divider />
-  </Layout>
-);
+      <Widgets />
+
+      <Divider />
+    </Layout>
+  );
+};
 
 export default Home;

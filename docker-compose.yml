@@ -12,4 +12,4 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=production
-      - BACKEND_URL=http://your-backend-url.com  # Add your backend URL here
+      - BACKEND_URL= http://backend-app-lb-1551102113.us-east-1.elb.amazonaws.com  # Add your backend URL here
