@@ -22,4 +22,4 @@ export default function () {
 }
 
 
-// k6 run ui_loadtest.js --out json=results.json
+// k6 run ui_loadtest.js
