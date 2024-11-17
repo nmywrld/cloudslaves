@@ -112,24 +112,6 @@ resource "aws_ecs_service" "frontend_service" {
 }
 
 
-
-# CloudWatch Metric for ECS Service CPU Utilization
-resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {
-  alarm_name          = "ecs-cpu-high"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/ECS"
-  period              = "60"
-  statistic           = "Average"
-  threshold           = "20"
-  alarm_description   = "This metric monitors ECS service CPU utilization"
-  dimensions = {
-    ClusterName  = aws_ecs_cluster.frontend_cluster.name
-    ServiceName  = aws_ecs_service.frontend_service.name
-  }
-}
-
 # ECS Service Autoscaling
 resource "aws_appautoscaling_target" "frontend_scaling_target" {
   max_capacity       = 10
@@ -151,7 +133,16 @@ resource "aws_appautoscaling_policy" "frontend_scaling_policy" {
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
-    scale_in_cooldown  = 300
-    scale_out_cooldown = 300
+    scale_in_cooldown  = 60
+    scale_out_cooldown = 180
   }
+}
+
+
+output "frontend_service_url" {
+  value = aws_lb.frontend_app_lb.dns_name
+}
+
+output "backend_service_url" {
+  value = aws_lb.backend_app_lb.dns_name
 }
