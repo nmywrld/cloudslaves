@@ -6,7 +6,7 @@ on:
 
 jobs:
   build_image:
-    name: Build Image and deploy to GCP
+    name: Deploy to cloudslaves to AWS 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
