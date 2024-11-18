@@ -1,3 +1,7 @@
+resource "aws_cloudwatch_log_group" "ecs_task_log_group" {
+  name              = "/ecs/frontend-task"
+  retention_in_days = 7  # Adjust the retention period as needed
+}
 
 # CloudWatch Metric for ECS Service CPU Utilization
 resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {

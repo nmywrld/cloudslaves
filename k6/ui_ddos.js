@@ -13,8 +13,8 @@ export let options = {
 };
 
 export default function () {
-  const headers = { 'x-k6-test': 'k6-test-header' };
-  // const headers = { 'x-k6-test': 'wrong-header' };
+  // const headers = { 'x-k6-test': 'k6-test-header' };
+  const headers = { 'x-k6-test': 'wrong-header' };
   const res = http.get('http://frontend-app-lb-62795513.us-east-1.elb.amazonaws.com/home', { headers });
 
   check(res, {

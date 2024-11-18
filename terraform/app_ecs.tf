@@ -11,18 +11,6 @@ resource "aws_ecs_task_definition" "frontend_task" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
 
-  # container_definitions = jsonencode([{
-  #   name      = "frontend"
-  #   image     = "nmywrld/cloudslaves-frontend"
-  #   essential = true
-  #   portMappings = [
-  #     {
-  #       containerPort = 80
-  #       protocol      = "tcp"
-  #     }
-  #   ]
-  # }])
-
   container_definitions = jsonencode([{
     name      = "frontend"
     image     = "nmywrld/cloudslaves-frontend"
@@ -40,6 +28,14 @@ resource "aws_ecs_task_definition" "frontend_task" {
       }
       // Add other environment variables here
     ]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-group         = "/ecs/frontend-task"
+        awslogs-region        = "us-east-1"  # Adjust the region as needed
+        awslogs-stream-prefix = "ecs"
+      }
+    }
   }])
 
   depends_on = [ aws_lb.backend_app_lb ]
@@ -59,6 +55,25 @@ data "aws_iam_policy_document" "ecs_assume_role_policy" {
       identifiers = ["ecs-tasks.amazonaws.com"]
     }
   }
+}
+
+resource "aws_iam_role_policy" "ecs_task_execution_policy" {
+  name = "ecsTaskExecutionPolicy"
+  role = aws_iam_role.ecs_task_execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:*:*:log-group:/ecs/frontend-task:*"
+      }
+    ]
+  })
 }
 # Security group for ECS service
 resource "aws_security_group" "ecs_service_sg" {
